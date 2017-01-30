@@ -5,7 +5,7 @@ Crafty.background('rgb(30,120,150)');
 //Init Variables
 var viewWidth = Crafty.viewport.width;
 var viewHeight = Crafty.viewport.height;
-var aiSpeed = 2;
+var aiSpeed = 3;
 var reward = 0;
 //Paddles
 var ai = Crafty.e('AIPaddle, 2D, Canvas, Color, Twoway')
@@ -155,8 +155,8 @@ document.getElementById("loadData").addEventListener("click", function () {
 
 
 Crafty.e("Delay").delay(function () {
-  localStorage.setItem('agentBrain', agent.toJSON());
-}, 60000, 0);
+  localStorage.agentBrain =  JSON.stringify(agent.toJSON());
+}, 9000, -1);
 
 
 
@@ -172,17 +172,23 @@ var ball = Crafty.e('2D, DOM, Image, Collision')
   .bind('EnterFrame', function () {
 
     //hit floor or roof
-    if (this.y <= 0 || this.y >= viewHeight - this.h)
+    if (this.y <= 0 || this.y >= viewHeight - this.h){
       this.dY *= -1;
-
+    }
     if (this.x > viewWidth - this.w) {
       this.x = viewWidth / 2;
+      this.y = (viewHeight / 2) - (this.h / 2);
+      this.dY =  Crafty.math.randomInt(-3, 3);
+      this.dX = Crafty.math.randomInt(2, 3);
       Crafty('AIPoints').each(function () {
         this.text(++this.points + ' Points')
       });
     }
     if (this.x < this.w) {
       this.x = viewWidth / 2;
+      this.y = (viewHeight / 2) - (this.h / 2);
+      this.dX = Crafty.math.randomInt(-2, -3);
+      this.dY =  Crafty.math.randomInt(-3, 3);
       Crafty('PlayerPoints').each(function () {
         this.text(++this.points + ' Points')
       });
@@ -192,6 +198,7 @@ var ball = Crafty.e('2D, DOM, Image, Collision')
       });
     }
 
+
     this.x += this.dX;
     this.y += this.dY;
 
@@ -200,12 +207,14 @@ var ball = Crafty.e('2D, DOM, Image, Collision')
 
 
     var action = agent.act(getState());
-
+    var actionString = "";
     if (action == 0) {
       ++player.y;
+	actionString = "Down";
     }
     if (action == 1) {
       --player.y;
+	actionString = "Up";
     }
 
     reward = 0;
@@ -223,8 +232,18 @@ var ball = Crafty.e('2D, DOM, Image, Collision')
       reward -= 100.0;
     }
 
-    agent.learn(reward);
+	Crafty('PlayerPowerUp').each(function () {
+    this.text("Reward: " + reward);
+  });
 
+	Crafty('FPSCounter').each(function () {
+    this.text("Agent Action: " + actionString);
+  });
+
+
+
+    agent.learn(reward);
+	
 
 
 
@@ -312,6 +331,12 @@ Crafty.e('AISpeed, DOM, 2D, Text')
   .text('AI Speed: ' + aiSpeed);
 
 
+
+// FPS Counter
+Crafty.e('FPSCounter, DOM, 2D, Text')
+  .attr({ x: 700, y: 60, w: 100, h: 20 })
+  .textColor('#FFFFFF', 0.8)
+  .text('FPS: 0');
 
 
 function createPowerUpFor(item, paddleName) {

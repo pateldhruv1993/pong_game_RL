@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * Crafty v0.5.4
 * http://craftyjs.com
 *
@@ -51,7 +51,7 @@
 
 	initState = function () {
     	GUID = 1; //GUID for entity IDs
-    	FPS = 50;
+    	FPS = 150;
     	frame = 1;
 
     	components = {}; //map of components and their functions
