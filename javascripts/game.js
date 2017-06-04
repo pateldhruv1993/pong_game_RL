@@ -149,7 +149,13 @@ document.getElementById("saveData").addEventListener("click", function () {
 
 document.getElementById("loadData").addEventListener("click", function () {
   console.log("Load Data");
-  var agentBrain = JSON.parse(localStorage.agentBrain);
+  
+  try {
+    var agentBrain = JSON.parse(localStorage.agentBrain);  
+  } catch (error) {
+    console.log("Couldn't find a brain in localStorage so loading the one from file");
+    var agentBrain = savedBrain;
+  }
   console.log(agentBrain);
   agent.fromJSON(agentBrain);
 });
